@@ -121,10 +121,10 @@ add_files $synthDir/Static/${static}_synth.dcp
 add_files $xdcDir/top_interwiser.xdc
 set_property USED_IN {implementation} [get_files $xdcDir/top_interwiser.xdc]
 add_file $synthDir/${pm2_v1}/${pm2}_synth.dcp
-command "set_property SCOPED_TO_CELLS \{$inst_pm2\} \[get_files ${synthDir}/${pm2_v1}/${pm2}_synth.dcp\]"
+set_property SCOPED_TO_CELLS {inst_shift} [get_files $synthDir/${pm2_v1}/${pm2}_synth.dcp]
 add_file $synthDir/${pm1_v1}/${pm1}_synth.dcp
-command "set_property SCOPED_TO_CELLS \{$inst_pm1\} \[get_files $synthDir/${pm1_v1}/${pm1}_synth.dcp\]"
-command "link_design -mode default -reconfig_partitions \{$inst_pm1 $inst_pm2\} -part $device -top $static"
+set_property SCOPED_TO_CELLS {inst_count} [get_files $synthDir/${pm1_v1}/${pm1}_synth.dcp]
+link_design -mode default -reconfig_partitions {inst_count inst_shift} -part ${device} -top ${static}
 write_checkpoint -force $implDir/${init_config}/top_link_design.dcp
 opt_design
 write_checkpoint -force $implDir/${init_config}/top_opt_design.dcp 
@@ -171,10 +171,10 @@ create_project -in_memory -part ${device}
 set_property board_part ${board} [current_project]
 add_files $dcpDir/top_static.dcp
 add_file $synthDir/${pm2_v2}/${pm2}_synth.dcp
-command "set_property SCOPED_TO_CELLS \{$inst_pm2\} \[get_files ${synthDir}/${pm2_v2}/${pm2}_synth.dcp\]"
+set_property SCOPED_TO_CELLS { inst_shift } [get_files $synthDir/${pm2_v2}/${pm2}_synth.dcp]
 add_file $synthDir/${pm1_v2}/${pm1}_synth.dcp
-command "set_property SCOPED_TO_CELLS \{$inst_pm1\} \[get_files ${synthDir}/${pm1_v2}/${pm1}_synth.dcp\]"
-command "link_design -mode default -reconfig_partitions \{$inst_pm1 $inst_pm2\} -part ${device} -top top"
+set_property SCOPED_TO_CELLS { inst_count } [get_files $synthDir/${pm1_v2}/${pm1}_synth.dcp]
+link_design -mode default -reconfig_partitions { inst_count inst_shift } -part ${device} -top top
 write_checkpoint -force $implDir/${alter_config}/top_link_design.dcp
 opt_design
 write_checkpoint -force $implDir/${alter_config}/top_opt_design.dcp
@@ -203,7 +203,7 @@ close_project
 
 #5、验证两种配置是否兼容
 puts "#HD: Running pr_verify between initial Configuration '${alter_config}' and subsequent configurations '${init_config}'"
-command "pr_verify -full_check -initial ${implDir}/${alter_config}/top_route_design.dcp -additional  \{$implDir/${init_config}/top_route_design.dcp\}"
+pr_verify -full_check -initial $implDir/${alter_config}/top_route_design.dcp -additional  $implDir/${init_config}/top_route_design.dcp
 
 #6、生成两种配置的bit和部分配置bit
 puts "	#HD: Running write_bitstream on ${alter_config}"
