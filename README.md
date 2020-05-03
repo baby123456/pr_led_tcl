@@ -8,10 +8,10 @@ To genarate partitional and full bitstream
 
 # Default project HIERARCHY
 The directory structure underneath this top-level folder is described below:
-* \Bitstreams
+  \Bitstreams
   |   This folder is empty and will be the target location for bitstream generation.
   |       
-* \Implement
+  \Implement
   |   This folder is the target location for checkpoints and reports for each of
   |   of the design configurations.  Two subfolders are present, ready for 
   |   implementation results.
@@ -22,7 +22,7 @@ The directory structure underneath this top-level folder is described below:
   +-----  \Config_shift_left_count_down_import
   |        This is the location for the second configuration results.
   |
-* \Sources
+  \Sources
   |
   +-----  \hdl
   |       Verilog source code is located within these folders.  There are folders
@@ -42,7 +42,7 @@ The directory structure underneath this top-level folder is described below:
   |           pblocks.xdc contains the PR floorplan
   |           top_io.xdc + pblocks.xdc = top.xdc
   |
-* \Synth
+  \Synth
   |   This folder contains empty folders that will receive the post-synthesis
   |   checkpoints for all the modules of the design.
   |
