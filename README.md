@@ -3,7 +3,7 @@ Firstly you should modify all.tcl as follow to adapt your PR project
 * **FPGA device board**
 * **input and output directory**
 * **static module name,Reconfigurable module(RM) name and RM variations**
-To genarate partitional and full bitstream
+# To genarate partitional and full bitstream
 **run `source all.tcl` in vivado tcl mode**
 
 # Default project HIERARCHY
