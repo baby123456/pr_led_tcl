@@ -39,7 +39,7 @@ create_project -in_memory -part ${device}
 set_property source_mgmt_mode All [current_project]
 set_property board_part ${board} [current_project]
 add_files $rtlDir/${static}/${static}.v
-synth_design -mode default -flatten_hierarchy rebuilt -top ${static} -part ${device} 
+synth_design -mode default -flatten_hierarchy rebuilt -top ${static} -part ${device}
 write_checkpoint -force $synthDir/Static/${static}_synth.dcp
 report_utilization -file $synthDir/Static/${static}_utilization_synth.rpt
 close_project
@@ -70,7 +70,7 @@ create_project -in_memory -part ${device}
 set_property source_mgmt_mode All [current_project]
 set_property board_part ${board} [current_project]
 add_files $rtlDir/${pm1_v2}/${pm1_v2}.v
-synth_design -mode out_of_context -flatten_hierarchy rebuilt -top ${pm1} -part ${device} 
+synth_design -mode out_of_context -flatten_hierarchy rebuilt -top ${pm1} -part ${device}
 write_checkpoint -force $synthDir/${pm1_v2}/${pm1}_synth.dcp
 report_utilization -file $synthDir/${pm1_v2}/${pm1}_utilization_synth.rpt
 close_project
@@ -87,7 +87,7 @@ set_property source_mgmt_mode All [current_project]
 set_property board_part ${board} [current_project]
 add_files $rtlDir/${pm2_v1}/${pm2_v1}.v
 synth_design -mode out_of_context -flatten_hierarchy rebuilt -top ${pm2} -part ${device}
-write_checkpoint -force $synthDir/${pm2_v1}/${pm2}_synth.dcp 
+write_checkpoint -force $synthDir/${pm2_v1}/${pm2}_synth.dcp
 report_utilization -file $synthDir/${pm2_v1}/${pm2}_utilization_synth.rpt
 close_project
 puts "#HD: Synthesis of module ${pm2_v1} complete\n"
@@ -121,20 +121,20 @@ add_files $synthDir/Static/${static}_synth.dcp
 add_files $xdcDir/top_interwiser.xdc
 set_property USED_IN {implementation} [get_files $xdcDir/top_interwiser.xdc]
 add_file $synthDir/${pm2_v1}/${pm2}_synth.dcp
-set_property SCOPED_TO_CELLS {inst_shift} [get_files $synthDir/${pm2_v1}/${pm2}_synth.dcp]
+command "set_property SCOPED_TO_CELLS \{$inst_pm2\} \[get_files ${synthDir}/${pm2_v1}/${pm2}_synth.dcp\]"
 add_file $synthDir/${pm1_v1}/${pm1}_synth.dcp
-set_property SCOPED_TO_CELLS {inst_count} [get_files $synthDir/${pm1_v1}/${pm1}_synth.dcp]
-link_design -mode default -reconfig_partitions {inst_count inst_shift} -part ${device} -top ${static}
+command "set_property SCOPED_TO_CELLS \{$inst_pm1\} \[get_files $synthDir/${pm1_v1}/${pm1}_synth.dcp\]"
+command "link_design -mode default -reconfig_partitions \{$inst_pm1 $inst_pm2\} -part $device -top $static"
 write_checkpoint -force $implDir/${init_config}/top_link_design.dcp
 opt_design
-write_checkpoint -force $implDir/${init_config}/top_opt_design.dcp 
+write_checkpoint -force $implDir/${init_config}/top_opt_design.dcp
 place_design
-write_checkpoint -force $implDir/${init_config}/top_place_design.dcp 
+write_checkpoint -force $implDir/${init_config}/top_place_design.dcp
 phys_opt_design
 write_checkpoint -force $implDir/${init_config}/top_phys_opt_design.dcp
 route_design
-puts "	#HD: Completed: opt_design,place_design,phys_opt_design,route_design"
-write_checkpoint -force $implDir/${init_config}/top_route_design.dcp 
+puts "  #HD: Completed: opt_design,place_design,phys_opt_design,route_design"
+write_checkpoint -force $implDir/${init_config}/top_route_design.dcp
 #报告利用率、布线状态以及时序
 report_utilization -file $implDir/${init_config}/reports/top_utilization_route_design.rpt
 report_route_status -file $implDir/${init_config}/reports/top_route_status.rpt
@@ -171,19 +171,19 @@ create_project -in_memory -part ${device}
 set_property board_part ${board} [current_project]
 add_files $dcpDir/top_static.dcp
 add_file $synthDir/${pm2_v2}/${pm2}_synth.dcp
-set_property SCOPED_TO_CELLS { inst_shift } [get_files $synthDir/${pm2_v2}/${pm2}_synth.dcp]
+command "set_property SCOPED_TO_CELLS \{$inst_pm2\} \[get_files ${synthDir}/${pm2_v2}/${pm2}_synth.dcp\]"
 add_file $synthDir/${pm1_v2}/${pm1}_synth.dcp
-set_property SCOPED_TO_CELLS { inst_count } [get_files $synthDir/${pm1_v2}/${pm1}_synth.dcp]
-link_design -mode default -reconfig_partitions { inst_count inst_shift } -part ${device} -top top
+command "set_property SCOPED_TO_CELLS \{$inst_pm1\} \[get_files ${synthDir}/${pm1_v2}/${pm1}_synth.dcp\]"
+command "link_design -mode default -reconfig_partitions \{$inst_pm1 $inst_pm2\} -part ${device} -top top"
 write_checkpoint -force $implDir/${alter_config}/top_link_design.dcp
 opt_design
 write_checkpoint -force $implDir/${alter_config}/top_opt_design.dcp
-place_design 
+place_design
 write_checkpoint -force $implDir/${alter_config}/top_place_design.dcp
-phys_opt_design 
+phys_opt_design
 write_checkpoint -force $implDir/${alter_config}/top_phys_opt_design.dcp
 route_design
-puts "	#HD: Completed: opt_design,place_design,phys_opt_design,route_design"
+puts "  #HD: Completed: opt_design,place_design,phys_opt_design,route_design"
 write_checkpoint -force $implDir/${alter_config}/top_route_design.dcp
 #报告利用率、布线状态以及时序
 report_utilization -file $implDir/${alter_config}/reports/top_utilization_route_design.rpt
@@ -203,18 +203,18 @@ close_project
 
 #5、验证两种配置是否兼容
 puts "#HD: Running pr_verify between initial Configuration '${alter_config}' and subsequent configurations '${init_config}'"
-pr_verify -full_check -initial $implDir/${alter_config}/top_route_design.dcp -additional  $implDir/${init_config}/top_route_design.dcp
+command "pr_verify -full_check -initial ${implDir}/${alter_config}/top_route_design.dcp -additional  \{$implDir/${init_config}/top_route_design.dcp\}"
 
 #6、生成两种配置的bit和部分配置bit
-puts "	#HD: Running write_bitstream on ${alter_config}"
-open_checkpoint $implDir/${alter_config}/top_route_design.dcp 
+puts "  #HD: Running write_bitstream on ${alter_config}"
+open_checkpoint $implDir/${alter_config}/top_route_design.dcp
 write_bitstream -force  $bitDir/${alter_config}_full -no_partial_bitfile
 write_bitstream -force  -cell ${inst_pm2} $bitDir/pblock_${inst_pm2}_${pm2_v2}_partial
 write_bitstream -force  -cell ${inst_pm1} $bitDir/pblock_${inst_pm1}_${pm1_v2}_partial
-close_project 
-puts "	#HD: Running write_bitstream on ${init_config}"
-open_checkpoint $implDir/${init_config}/top_route_design.dcp 
+close_project
+puts "  #HD: Running write_bitstream on ${init_config}"
+open_checkpoint $implDir/${init_config}/top_route_design.dcp
 write_bitstream -force  $bitDir/${init_config}_full -no_partial_bitfile
 write_bitstream -force  -cell ${inst_pm2} $bitDir/pblock_${inst_pm2}_${pm2_v1}_partial
 write_bitstream -force  -cell ${inst_pm1} $bitDir/pblock_${inst_pm1}_${pm1_v1}_partial
-close_project 
+close_project
